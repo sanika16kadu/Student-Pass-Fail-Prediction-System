@@ -1,36 +1,446 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Prediction</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Academic Prediction - AI/ML System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="/static/css/theme.css">
 </head>
 
-<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+<body class="light">
 
-<div class="card p-4 shadow-lg" style="width: 400px;">
-    <h3 class="text-center mb-3">Student Prediction</h3>
+    <!-- TOP NAVIGATION -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center gap-3 text-white text-decoration-none" href="/dashboard">
+                <div class="brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold fs-6 lh-1">Student Pass & Fail Prediction System</div>
+                    <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.02em;">AI/ML BASED ACADEMIC PERFORMANCE PREDICTION</small>
+                </div>
+            </a>
 
-    <form method="POST">
-        <input class="form-control mb-3" name="hours" placeholder="Study Hours" required>
-        <input class="form-control mb-3" name="attendance" placeholder="Attendance %" required>
-        <input class="form-control mb-3" name="marks" placeholder="Marks" required>
+            <button class="navbar-toggler border-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <button class="btn btn-success w-100">Predict</button>
-    </form>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom active" href="/predict">
+                            <i class="bi bi-cpu-fill"></i> Predict Student
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/analysis">
+                            <i class="bi bi-bar-chart-steps"></i> ML Analysis
+                        </a>
+                    </li>
+                </ul>
 
-    {% if result %}
-        <h4 class="text-center mt-3">
-            Result:
-            <span class="text-{{ 'success' if result=='PASS' else 'danger' }}">
-                {{result}}
-            </span>
-        </h4>
-    {% endif %}
+                <div class="d-flex align-items-center gap-3">
+                    <button id="themeToggleBtn" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 rounded-pill px-3" title="Toggle Dark/Light Mode">
+                        <i id="themeToggleIcon" class="bi bi-moon-stars-fill"></i>
+                        <span class="small d-none d-md-inline">Theme</span>
+                    </button>
+                    <a href="/dashboard" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                        <i class="bi bi-arrow-left"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <div class="text-center mt-3">
-        <a href="/dashboard">Back</a>
-    </div>
-</div>
+    <!-- MAIN CONTAINER -->
+    <main class="container py-4 flex-grow-1">
 
+        <div class="row justify-content-center">
+            <div class="col-xl-9 col-lg-10">
+
+                <!-- INTRO TITLE -->
+                <div class="text-center mb-4">
+                    <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill mb-2">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> AI Classification Engine
+                    </span>
+                    <h2 class="fw-800 tracking-tight">Student Academic Performance Predictor</h2>
+                    <p class="text-muted mx-auto" style="max-width: 620px;">
+                        Input continuous academic assessment metrics to generate machine-learned pass/fail classifications with calibrated probability estimates and diagnostic advising.
+                    </p>
+                </div>
+
+                <!-- QUICK DEMO PRESETS -->
+                <div class="d-flex justify-content-center gap-2 mb-4 flex-wrap">
+                    <span class="text-muted small align-self-center me-1">Demo Presets:</span>
+                    <button type="button" onclick="loadSample('pass')" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                        <i class="bi bi-check2-circle me-1"></i> Load High-Performing Student
+                    </button>
+                    <button type="button" onclick="loadSample('fail')" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Load At-Risk Student
+                    </button>
+                </div>
+
+                <!-- MAIN FORM CARD -->
+                <div class="dash-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-0 text-primary">
+                                <i class="bi bi-journal-text me-2"></i> Student Academic Information
+                            </h5>
+                            <small class="text-muted">Enter valid numeric scores across all 7 evaluation dimensions.</small>
+                        </div>
+                        <span class="badge bg-secondary-subtle text-secondary small">
+                            Algorithm: <strong>{{ algorithm_name or 'Random Forest' }}</strong>
+                        </span>
+                    </div>
+
+                    <!-- ERROR ALERT -->
+                    <div id="predictErrorAlert" class="alert alert-danger d-none" role="alert"></div>
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-circle-fill me-2"></i> {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <!-- PREDICTION FORM -->
+                    <form id="academicPredictionForm" method="POST" action="/predict" novalidate>
+                        <div class="row g-4">
+
+                            <!-- 1. Attendance Percentage -->
+                            <div class="col-md-6">
+                                <label for="attendance" class="form-label-custom">
+                                    <i class="bi bi-calendar-check text-primary"></i>
+                                    Attendance Percentage
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control input-custom" id="attendance" name="attendance" value="{{ inputs.attendance if inputs else '82.0' }}" placeholder="e.g. 82.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">%</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 100%</span>
+                                    <span>Benchmark: &ge; 75%</span>
+                                </div>
+                            </div>
+
+                            <!-- 2. Previous Semester Percentage -->
+                            <div class="col-md-6">
+                                <label for="prev_sem_percentage" class="form-label-custom">
+                                    <i class="bi bi-mortarboard text-primary"></i>
+                                    Previous Semester Percentage
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control input-custom" id="prev_sem_percentage" name="prev_sem_percentage" value="{{ inputs.prev_sem_percentage if inputs else '74.0' }}" placeholder="e.g. 74.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">%</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 100%</span>
+                                    <span>Benchmark: &ge; 60%</span>
+                                </div>
+                            </div>
+
+                            <!-- 3. Internal Assessment Marks -->
+                            <div class="col-md-4">
+                                <label for="internal_marks" class="form-label-custom">
+                                    <i class="bi bi-file-earmark-bar-graph text-primary"></i>
+                                    Internal Marks
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control input-custom" id="internal_marks" name="internal_marks" value="{{ inputs.internal_marks if inputs else '68.0' }}" placeholder="e.g. 68.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">/100</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 100</span>
+                                    <span>Benchmark: &ge; 50</span>
+                                </div>
+                            </div>
+
+                            <!-- 4. Assignment Marks -->
+                            <div class="col-md-4">
+                                <label for="assignment_marks" class="form-label-custom">
+                                    <i class="bi bi-journal-check text-primary"></i>
+                                    Assignment Marks
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control input-custom" id="assignment_marks" name="assignment_marks" value="{{ inputs.assignment_marks if inputs else '72.0' }}" placeholder="e.g. 72.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">/100</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 100</span>
+                                    <span>Benchmark: &ge; 60</span>
+                                </div>
+                            </div>
+
+                            <!-- 5. Practical Marks -->
+                            <div class="col-md-4">
+                                <label for="practical_marks" class="form-label-custom">
+                                    <i class="bi bi-tools text-primary"></i>
+                                    Practical Marks
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control input-custom" id="practical_marks" name="practical_marks" value="{{ inputs.practical_marks if inputs else '75.0' }}" placeholder="e.g. 75.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">/100</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 100</span>
+                                    <span>Benchmark: &ge; 60</span>
+                                </div>
+                            </div>
+
+                            <!-- 6. Study Hours Per Day -->
+                            <div class="col-md-6">
+                                <label for="study_hours" class="form-label-custom">
+                                    <i class="bi bi-clock-history text-primary"></i>
+                                    Study Hours Per Day
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" min="0" max="16" class="form-control input-custom" id="study_hours" name="study_hours" value="{{ inputs.study_hours if inputs else '4.0' }}" placeholder="e.g. 4.0" required>
+                                    <span class="input-group-text bg-transparent text-muted">hrs/day</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 16 hrs</span>
+                                    <span>Benchmark: &ge; 3.0 hrs</span>
+                                </div>
+                            </div>
+
+                            <!-- 7. Previous Backlogs -->
+                            <div class="col-md-6">
+                                <label for="backlogs" class="form-label-custom">
+                                    <i class="bi bi-shield-x text-primary"></i>
+                                    Previous Backlogs / Arrears
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" min="0" max="10" class="form-control input-custom" id="backlogs" name="backlogs" value="{{ inputs.backlogs if inputs else '0' }}" placeholder="e.g. 0" required>
+                                    <span class="input-group-text bg-transparent text-muted">arrears</span>
+                                </div>
+                                <div class="input-range-hint">
+                                    <span>Scale: 0 - 10</span>
+                                    <span>Benchmark: 0 backlogs</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- BUTTONS: PREDICT RESULT & RESET -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top flex-wrap gap-2">
+                            <button type="button" id="formResetBtn" class="btn btn-outline-custom">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+
+                            <button type="submit" id="predictSubmitBtn" class="btn btn-primary-custom px-4">
+                                <span id="predictSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <i class="bi bi-cpu"></i>
+                                <span id="predictBtnText">Predict Result</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- AJAX RESULT CONTAINER (DYNAMIC RESULT INSERTION) -->
+                <div id="ajaxResultContainer">
+                    <!-- SERVER-SIDE RESULT FALLBACK (IF JS DISABLED OR DIRECT POST) -->
+                    {% if result %}
+                    <div class="result-card-container">
+                        <div class="{{ 'result-badge-pass' if result.prediction == 'PASS' else 'result-badge-fail' }} mb-4">
+                            <div class="row align-items-center g-4">
+                                <div class="col-lg-5 text-center border-lg-end">
+                                    <div class="text-uppercase small fw-bold tracking-wide opacity-75 mb-2">
+                                        {% if result.prediction == 'PASS' %}
+                                            <i class="bi bi-check-circle-fill text-success me-1"></i> Prediction Complete
+                                        {% else %}
+                                            <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Prediction Requires Attention
+                                        {% endif %}
+                                    </div>
+                                    <div class="display-3 fw-800 {{ 'text-success' if result.prediction == 'PASS' else 'text-danger' }} mb-2">
+                                        {{ result.prediction }}
+                                    </div>
+                                    <div class="h5 fw-bold mb-3">
+                                        Confidence: <span class="badge {{ 'bg-success' if result.prediction == 'PASS' else 'bg-danger' }} px-3 py-2 fs-6">{{ result.confidence }}%</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-arrow-up-circle"></i> Predict Again
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('formResetBtn').click()" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x-circle"></i> Reset Form
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7 ps-lg-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="fw-bold mb-0">Model Probability Breakdown</h6>
+                                        <span class="badge bg-secondary-subtle text-secondary small">{{ result.algorithm }}</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                            <span><i class="bi bi-check2 text-success"></i> Pass Probability</span>
+                                            <span class="text-success">{{ (result.pass_probability * 100)|round(1) }}%</span>
+                                        </div>
+                                        <div class="confidence-meter">
+                                            <div class="confidence-fill-pass" style="width: {{ result.pass_probability * 100 }}%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between small fw-semibold mb-1">
+                                            <span><i class="bi bi-x-lg text-danger"></i> Fail Probability</span>
+                                            <span class="text-danger">{{ (result.fail_probability * 100)|round(1) }}%</span>
+                                        </div>
+                                        <div class="confidence-meter">
+                                            <div class="confidence-fill-fail" style="width: {{ result.fail_probability * 100 }}%"></div>
+                                        </div>
+                                    </div>
+
+                                    <p class="small text-muted mb-0">
+                                        <i class="bi bi-info-circle me-1"></i> Predictions are generated dynamically by evaluating student metrics against trained statistical decision boundaries.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FACTORS REVIEW -->
+                        {% if result.factors %}
+                        <div class="dash-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                <div>
+                                    <h5 class="fw-bold mb-1">
+                                        <i class="bi bi-clipboard2-data-fill text-primary me-2"></i>
+                                        Student Academic Factors Breakdown
+                                    </h5>
+                                    <p class="text-muted small mb-0">
+                                        {% if result.prediction == 'PASS' %}
+                                            Overview of student academic inputs and baseline educational benchmarks.
+                                        {% else %}
+                                            Specific factors evaluated against academic benchmarks to assist teachers in targeted remedial advising.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <span class="badge {{ 'bg-success-subtle text-success' if result.prediction == 'PASS' else 'bg-danger-subtle text-danger' }} px-3 py-2 fw-bold">
+                                    {{ 'Meeting Academic Standards' if result.prediction == 'PASS' else 'At-Risk Factors Detected' }}
+                                </span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle text-center mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-start">Academic Metric</th>
+                                            <th>Entered Value</th>
+                                            <th>Educational Benchmark</th>
+                                            <th>Evaluation Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for f in result.factors %}
+                                    <tr>
+                                        <td class="text-start fw-semibold text-secondary">{{ f.label }}</td>
+                                        <td class="fw-bold">{{ f.value }} {{ f.unit }}</td>
+                                        <td class="text-muted">
+                                            {% if f.key == 'backlogs' %}0 subjects{% else %}&ge; {{ f.benchmark }} {{ f.unit }}{% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="status-pill {{ 'status-pass' if f.badge == 'success' else ('status-fail' if f.badge == 'danger' else 'status-warning') }}">
+                                                <i class="bi {{ 'bi-check-circle-fill' if f.badge == 'success' else ('bi-exclamation-octagon-fill' if f.badge == 'danger' else 'bi-exclamation-triangle-fill') }}"></i>
+                                                {{ f.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- MODEL INFORMATION SECTION: "How the Prediction Works" -->
+                <div class="dash-card mt-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-diagram-3-fill text-primary me-2"></i> How the AIML Prediction Works
+                    </h5>
+                    <p class="text-muted small mb-4">
+                        The prediction pipeline applies end-to-end machine learning methodologies: from student factor input through standardization, tree-based ensemble classification, and probability calibration.
+                    </p>
+
+                    <!-- PIPELINE STEP FLOW -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 text-center">
+                        <div class="pipeline-step">
+                            <div class="step-number">1</div>
+                            <div class="fw-bold small">Student Data</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">7 Academic Factors</div>
+                        </div>
+
+                        <i class="bi bi-arrow-right text-muted d-none d-md-inline fs-5"></i>
+
+                        <div class="pipeline-step">
+                            <div class="step-number">2</div>
+                            <div class="fw-bold small">Data Preprocessing</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Imputation &amp; Standard Scaling</div>
+                        </div>
+
+                        <i class="bi bi-arrow-right text-muted d-none d-md-inline fs-5"></i>
+
+                        <div class="pipeline-step">
+                            <div class="step-number">3</div>
+                            <div class="fw-bold small">ML Model</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">{{ algorithm_name or 'Random Forest' }}</div>
+                        </div>
+
+                        <i class="bi bi-arrow-right text-muted d-none d-md-inline fs-5"></i>
+
+                        <div class="pipeline-step">
+                            <div class="step-number">4</div>
+                            <div class="fw-bold small">Prediction</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Calibrated Probability</div>
+                        </div>
+
+                        <i class="bi bi-arrow-right text-muted d-none d-md-inline fs-5"></i>
+
+                        <div class="pipeline-step" style="background: var(--primary-subtle); border-color: var(--primary);">
+                            <div class="step-number" style="background: var(--success);">5</div>
+                            <div class="fw-bold small text-primary">PASS / FAIL</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Actionable Advising</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <div class="container-fluid px-lg-4 text-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span>🎓 <strong>Student Pass &amp; Fail Prediction System</strong> &bull; AI/ML Project Presentation</span>
+                <span>Powered by Scikit-Learn Classification Pipeline &bull; Academic Decision Support</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & Client Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app_interactive.js"></script>
 </body>
 </html>

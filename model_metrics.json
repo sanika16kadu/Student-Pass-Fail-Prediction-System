@@ -1,0 +1,129 @@
+{
+    "best_algorithm": "Random Forest",
+    "features": [
+        "attendance",
+        "prev_sem_percentage",
+        "internal_marks",
+        "assignment_marks",
+        "practical_marks",
+        "study_hours",
+        "backlogs"
+    ],
+    "target": "result",
+    "best_metrics": {
+        "accuracy": 0.8708,
+        "precision": 0.8817,
+        "recall": 0.948,
+        "f1_score": 0.9136,
+        "confusion_matrix": [
+            [
+                45,
+                22
+            ],
+            [
+                9,
+                164
+            ]
+        ]
+    },
+    "comparison": {
+        "Logistic Regression": {
+            "accuracy": 0.8583,
+            "precision": 0.884,
+            "recall": 0.9249,
+            "f1_score": 0.904,
+            "confusion_matrix": [
+                [
+                    46,
+                    21
+                ],
+                [
+                    13,
+                    160
+                ]
+            ]
+        },
+        "Decision Tree": {
+            "accuracy": 0.8458,
+            "precision": 0.8778,
+            "recall": 0.9133,
+            "f1_score": 0.8952,
+            "confusion_matrix": [
+                [
+                    45,
+                    22
+                ],
+                [
+                    15,
+                    158
+                ]
+            ]
+        },
+        "Random Forest": {
+            "accuracy": 0.8708,
+            "precision": 0.8817,
+            "recall": 0.948,
+            "f1_score": 0.9136,
+            "confusion_matrix": [
+                [
+                    45,
+                    22
+                ],
+                [
+                    9,
+                    164
+                ]
+            ]
+        },
+        "KNN": {
+            "accuracy": 0.8625,
+            "precision": 0.8723,
+            "recall": 0.948,
+            "f1_score": 0.9086,
+            "confusion_matrix": [
+                [
+                    43,
+                    24
+                ],
+                [
+                    9,
+                    164
+                ]
+            ]
+        },
+        "SVM": {
+            "accuracy": 0.85,
+            "precision": 0.8785,
+            "recall": 0.9191,
+            "f1_score": 0.8983,
+            "confusion_matrix": [
+                [
+                    45,
+                    22
+                ],
+                [
+                    14,
+                    159
+                ]
+            ]
+        }
+    },
+    "feature_importances": {
+        "attendance": 0.1264,
+        "prev_sem_percentage": 0.0698,
+        "internal_marks": 0.0723,
+        "assignment_marks": 0.0699,
+        "practical_marks": 0.0533,
+        "study_hours": 0.1,
+        "backlogs": 0.5084
+    },
+    "dataset_summary": {
+        "total_samples": 1200,
+        "train_samples": 960,
+        "test_samples": 240,
+        "total_pass": 866,
+        "total_fail": 334,
+        "pass_percentage": 72.17,
+        "fail_percentage": 27.83
+    }
+}

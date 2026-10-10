@@ -1,198 +1,531 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Academic Dashboard - Student Pass & Fail Prediction System</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-body {
-    margin:0;
-    font-family:Arial;
-}
-
-/* 🌟 PROFESSIONAL IMAGE BACKGROUND */
-body.light {
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                url("https://images.unsplash.com/photo-1509062522246-3755977927d7");
-    background-size: cover;
-    background-attachment: fixed;
-    color: white;
-}
-
-body.dark {
-    background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
-                url("https://images.unsplash.com/photo-1498050108023-c5249f4df085");
-    background-size: cover;
-    background-attachment: fixed;
-    color: white;
-}
-
-/* CARD */
-.card-box {
-    background: rgba(255,255,255,0.9);
-    padding:20px;
-    margin:10px;
-    border-radius:10px;
-}
-
-.dark .card-box {
-    background: rgba(0,0,0,0.7);
-}
-
-/* TABLE */
-table {
-    background: rgba(255,255,255,0.95);
-}
-
-.dark table {
-    background: rgba(0,0,0,0.7);
-    color:white;
-}
-
-.pass { color:lightgreen; font-weight:bold; }
-.fail { color:red; font-weight:bold; }
-
-input { text-align:center; }
-</style>
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="/static/css/theme.css">
 </head>
 
 <body class="light">
 
-<!-- NAVBAR -->
-<nav style="display:flex; justify-content:space-between; padding:10px; background:black; color:white;">
-    <h4>🎓 Student Dashboard</h4>
-    <div>
-        <button onclick="toggleTheme()" class="btn btn-light btn-sm">🌗</button>
-        <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+    <!-- TOP NAVIGATION -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center gap-3 text-white text-decoration-none" href="/dashboard">
+                <div class="brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold fs-6 lh-1">Student Pass & Fail Prediction System</div>
+                    <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.02em;">AI/ML BASED ACADEMIC PERFORMANCE PREDICTION</small>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link-custom active" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/predict">
+                            <i class="bi bi-cpu-fill"></i> Predict Student
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/analysis">
+                            <i class="bi bi-bar-chart-steps"></i> ML Analysis
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2 text-white-50 small bg-white bg-opacity-10 px-3 py-1 rounded-pill">
+                        <i class="bi bi-person-circle text-info"></i>
+                        <span class="text-white fw-semibold">{{ session.get('user', 'Teacher') }}</span>
+                    </div>
+
+                    <button id="themeToggleBtn" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 rounded-pill px-3" title="Toggle Dark/Light Mode">
+                        <i id="themeToggleIcon" class="bi bi-moon-stars-fill"></i>
+                        <span class="small d-none d-md-inline">Theme</span>
+                    </button>
+
+                    <a href="/logout" class="btn btn-sm btn-danger rounded-pill px-3" title="Log Out">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+
+        <!-- HEADER BANNER -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    Academic Overview &amp; Prediction Dashboard
+                </h3>
+                <p class="text-muted mb-0 small">
+                    Monitor cohort academic indicators, machine learning classifications, and individual student progress.
+                </p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-custom" data-bs-toggle="modal" data-bs-target="#uploadCsvModal">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Bulk Upload CSV
+                </button>
+                <button type="button" class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    <i class="bi bi-person-plus-fill"></i> Add Student
+                </button>
+            </div>
+        </div>
+
+        <!-- 5 SUMMARY METRICS CARDS -->
+        <div class="row g-3 mb-4">
+            <!-- 1. Total Students -->
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="stat-widget total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Total Students</div>
+                        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number animate-counter" data-target="{{ stats.total_students }}">0</div>
+                        <div class="stat-subtext">Registered in cohort</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Predicted Pass -->
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="stat-widget pass">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Predicted Pass</div>
+                        <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-success animate-counter" data-target="{{ stats.predicted_pass_count }}">0</div>
+                        <div class="stat-subtext">On-track students</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Predicted Fail -->
+            <div class="col-xl col-md-4 col-sm-6">
+                <div class="stat-widget fail">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Predicted Fail</div>
+                        <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-danger animate-counter" data-target="{{ stats.predicted_fail_count }}">0</div>
+                        <div class="stat-subtext">Require intervention</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Pass Percentage -->
+            <div class="col-xl col-md-6 col-sm-6">
+                <div class="stat-widget rate">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Pass Percentage</div>
+                        <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-warning animate-counter" data-target="{{ stats.pass_percentage }}" data-percent="true">0%</div>
+                        <div class="stat-subtext">Cohort pass trajectory</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Model Accuracy -->
+            <div class="col-xl col-md-6 col-sm-12">
+                <div class="stat-widget acc">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Model Accuracy</div>
+                        <div class="stat-icon"><i class="bi bi-cpu-fill"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-info animate-counter" id="modelAccuracyVal" data-target="87.1" data-percent="true">87.1%</div>
+                        <div class="stat-subtext">Validated on test set</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUALIZATIONS ROW -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-pie-chart-fill text-primary me-2"></i> Pass vs Fail Classification
+                        </h6>
+                        <span class="badge bg-secondary-subtle text-secondary small">Real-time</span>
+                    </div>
+                    <div style="position: relative; height: 240px;">
+                        <canvas id="passFailChart"></canvas>
+                    </div>
+                    <div class="d-flex justify-content-around text-center mt-3 pt-3 border-top small text-muted">
+                        <div>
+                            <span class="d-inline-block rounded-circle bg-success me-1" style="width: 10px; height: 10px;"></span>
+                            Pass: <strong>{{ stats.predicted_pass_count }}</strong>
+                        </div>
+                        <div>
+                            <span class="d-inline-block rounded-circle bg-danger me-1" style="width: 10px; height: 10px;"></span>
+                            Fail: <strong>{{ stats.predicted_fail_count }}</strong>
+                        </div>
+                        <div>
+                            <span class="d-inline-block rounded-circle bg-secondary me-1" style="width: 10px; height: 10px;"></span>
+                            Pending: <strong>{{ stats.total_students - stats.predicted_pass_count - stats.predicted_fail_count }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">
+                            <i class="bi bi-bar-chart-line-fill text-success me-2"></i> Academic Risk Tier Distribution
+                        </h6>
+                        <span class="badge bg-secondary-subtle text-secondary small">Composite Academic Score</span>
+                    </div>
+                    <div style="position: relative; height: 240px;">
+                        <canvas id="riskTierChart"></canvas>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small mt-3 pt-3 border-top">
+                        <span><i class="bi bi-shield-check text-primary"></i> Score &ge; 75: Low Risk</span>
+                        <span><i class="bi bi-shield-exclamation text-warning"></i> Score 50-74: Moderate</span>
+                        <span><i class="bi bi-shield-x text-danger"></i> Score &lt; 50: High Risk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STUDENTS TABLE CARD -->
+        <div class="dash-card">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-table text-primary me-2"></i> Student Cohort Performance Records
+                    </h5>
+                    <p class="text-muted small mb-0">Review academic factors, execute real-time model predictions, or generate formal PDF academic reports.</p>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="max-width: 260px;">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="studentTableSearch" class="form-control border-start-0" placeholder="Filter student name...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 70px;">Rank</th>
+                            <th class="text-start">Student Name</th>
+                            <th>Att %</th>
+                            <th>Prev Sem %</th>
+                            <th>Internals</th>
+                            <th>Assignments</th>
+                            <th>Practicals</th>
+                            <th>Study (h)</th>
+                            <th>Backlogs</th>
+                            <th>ML Result</th>
+                            <th>Confidence</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    {% for s in students %}
+                    <tr>
+                        <td class="fw-bold">
+                            {% if loop.index == 1 %}
+                                <span class="badge bg-warning text-dark px-2">🥇 #1</span>
+                            {% elif loop.index == 2 %}
+                                <span class="badge bg-light text-dark border px-2">🥈 #2</span>
+                            {% elif loop.index == 3 %}
+                                <span class="badge bg-secondary text-white px-2">🥉 #3</span>
+                            {% else %}
+                                <span class="text-muted">#{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-start fw-semibold">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.82rem;">
+                                    {{ s.name[:2]|upper }}
+                                </div>
+                                <span>{{ s.name }}</span>
+                            </div>
+                        </td>
+
+                        <form method="POST" action="/predict_student_row">
+                        <input type="hidden" name="id" value="{{ s.id }}">
+
+                        <td>
+                            <input name="attendance" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" value="{{ s.attendance }}" required>
+                        </td>
+                        <td>
+                            <input name="prev_sem" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" value="{{ s.prev_sem }}" required>
+                        </td>
+                        <td>
+                            <input name="internal_marks" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" value="{{ s.internal_marks }}" required>
+                        </td>
+                        <td>
+                            <input name="assignment" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" value="{{ s.assignment }}" required>
+                        </td>
+                        <td>
+                            <input name="practical" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" value="{{ s.practical }}" required>
+                        </td>
+                        <td>
+                            <input name="study" type="number" step="0.1" min="0" max="16" class="form-control form-control-sm text-center mx-auto" style="width: 65px;" value="{{ s.study }}" required>
+                        </td>
+                        <td>
+                            <input name="backlogs" type="number" min="0" max="10" class="form-control form-control-sm text-center mx-auto" style="width: 60px;" value="{{ s.backlogs }}" required>
+                        </td>
+
+                        <td>
+                            {% if 'PASS' in s.result %}
+                                <span class="status-pill status-pass">
+                                    <i class="bi bi-check-circle-fill"></i> PASS
+                                </span>
+                            {% elif 'FAIL' in s.result %}
+                                <span class="status-pill status-fail">
+                                    <i class="bi bi-x-octagon-fill"></i> FAIL
+                                </span>
+                            {% else %}
+                                <span class="status-pill status-warning">
+                                    <i class="bi bi-hourglass-split"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if s.probability > 0 %}
+                                <span class="fw-semibold">{{ s.probability }}%</span>
+                            {% else %}
+                                <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button type="submit" class="btn btn-outline-primary" title="Re-run ML prediction with updated inputs">
+                                    <i class="bi bi-play-circle-fill"></i>
+                                </button>
+                                </form>
+                                <a href="/pdf/{{ s.id }}" class="btn btn-outline-info" title="Download Academic PDF Report">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                                <a href="/delete/{{ s.id }}" class="btn btn-outline-danger" onclick="return confirm('Delete record for {{ s.name }}?')" title="Delete Student Record">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="12" class="text-muted py-5">
+                            <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                            No student records found in your dashboard.<br>
+                            Click <strong>Add Student</strong> or <strong>Bulk Upload CSV</strong> to import cohort data.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <div class="container-fluid px-lg-4 text-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span>🎓 <strong>Student Pass &amp; Fail Prediction System</strong> &bull; AI/ML Project Presentation</span>
+                <span>Powered by Scikit-Learn Classification Pipeline &bull; Academic Decision Support</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL: ADD STUDENT -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="addStudentModalLabel">
+                        <i class="bi bi-person-plus-fill me-2"></i> Register New Student
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="/add_student">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label-custom">Student Full Name</label>
+                            <input name="name" class="form-control input-custom" placeholder="e.g. Maya Sharma" required>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Attendance Percentage (0-100%)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="attendance" class="form-control input-custom" value="78.0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Previous Semester % (0-100%)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="prev_sem" class="form-control input-custom" value="70.0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Internal Assessment (/100)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="internal_marks" class="form-control input-custom" value="65.0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Assignment Marks (/100)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="assignment" class="form-control input-custom" value="72.0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Practical Marks (/100)</label>
+                                <input type="number" step="0.1" min="0" max="100" name="practical" class="form-control input-custom" value="75.0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Daily Study Hours (0-16 hrs)</label>
+                                <input type="number" step="0.1" min="0" max="16" name="study" class="form-control input-custom" value="3.5" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Previous Backlogs / Arrears</label>
+                                <input type="number" min="0" max="10" name="backlogs" class="form-control input-custom" value="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom">Add Student &amp; Run ML Model</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</nav>
 
-<div class="container">
+    <!-- MODAL: BULK CSV UPLOAD -->
+    <div class="modal fade" id="uploadCsvModal" tabindex="-1" aria-labelledby="uploadCsvModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="uploadCsvModalLabel">
+                        <i class="bi bi-file-earmark-arrow-up me-2"></i> Bulk Student CSV Import
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="modal-body p-4">
+                        <p class="text-muted small mb-3">
+                            Upload a standard CSV file with either simple student names or full academic columns (<code>name, attendance, prev_sem, internal_marks, assignment, practical, study, backlogs</code>).
+                        </p>
+                        <div class="mb-3">
+                            <input type="file" name="file" accept=".csv" class="form-control input-custom" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom">Upload &amp; Classify Cohort</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-<!-- ADD -->
-<div class="card-box">
-<form method="POST" action="/add_student">
-<input name="name" class="form-control mb-2" placeholder="Student Name">
-<button class="btn btn-primary">Add Student</button>
-</form>
-</div>
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app_interactive.js"></script>
 
-<!-- CSV -->
-<div class="card-box">
-<form method="POST" action="/upload" enctype="multipart/form-data">
-<input type="file" name="file">
-<button class="btn btn-warning">Upload CSV</button>
-</form>
-</div>
+    <script>
+    // Initialize Real Charts
+    const passCount = {{ stats.predicted_pass_count }};
+    const failCount = {{ stats.predicted_fail_count }};
+    const pendingCount = Math.max(0, {{ stats.total_students }} - passCount - failCount);
 
-<!-- TABLE -->
-<div class="card-box">
-<table class="table text-center">
+    new Chart(document.getElementById("passFailChart"), {
+        type: 'doughnut',
+        data: {
+            labels: ['Predicted Pass', 'Predicted Fail', 'Pending Prediction'],
+            datasets: [{
+                data: [passCount, failCount, pendingCount],
+                backgroundColor: ['#10b981', '#ef4444', '#94a3b8'],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans' } } }
+            },
+            cutout: '70%'
+        }
+    });
 
-<tr>
-<th>🏆 Rank</th>
-<th>Name</th>
-<th>Study</th>
-<th>Attendance</th>
-<th>UT1 (/20)</th>
-<th>UT2 (/20)</th>
-<th>ESE (/60)</th>
-<th>Result</th>
-<th>PDF</th>
-<th>Delete</th>
-</tr>
+    let lowRisk = 0, modRisk = 0, highRisk = 0;
+    {% for s in students %}
+        {% if s.score >= 75 %}
+            lowRisk++;
+        {% elif s.score >= 50 %}
+            modRisk++;
+        {% else %}
+            highRisk++;
+        {% endif %}
+    {% endfor %}
 
-{% for s in students %}
-<tr>
-
-<!-- RANK -->
-{% if loop.index == 1 %}
-<td style="color:gold; font-weight:bold;">🥇 #1</td>
-{% else %}
-<td>#{{loop.index}}</td>
-{% endif %}
-
-<td>{{s[1]}}</td>
-
-<form method="POST" action="/predict">
-<input type="hidden" name="id" value="{{s[0]}}">
-
-<td><input name="study" value="{{s[3]}}"></td>
-<td><input name="att" value="{{s[4]}}"></td>
-<td><input name="m1" value="{{s[5]}}"></td>
-<td><input name="m2" value="{{s[6]}}"></td>
-<td><input name="m3" value="{{s[7]}}"></td>
-
-<td>
-<button class="btn btn-success">Predict</button>
-
-<div><b>{{s[8]}}</b></div>
-
-{% if "PASS" in s[8] %}
-<span class="pass">✔ PASS</span>
-{% endif %}
-
-{% if "FAIL" in s[8] %}
-<span class="fail">✖ FAIL</span>
-{% endif %}
-
-{% if tips and tips[s[0]] %}
-<br><small>{{tips[s[0]]}}</small>
-{% endif %}
-</td>
-
-</form>
-
-<td><a href="/pdf/{{s[0]}}" class="btn btn-info">PDF</a></td>
-<td><a href="/delete/{{s[0]}}" class="btn btn-danger">X</a></td>
-
-</tr>
-{% endfor %}
-
-</table>
-</div>
-
-<!-- BAR GRAPH -->
-<div class="card-box">
-<canvas id="chart"></canvas>
-</div>
-
-</div>
-
-<script>
-function toggleTheme(){
-    document.body.classList.toggle("dark");
-    document.body.classList.toggle("light");
-}
-
-/* 📊 BAR GRAPH (FIXED) */
-let excellent=0, average=0, weak=0;
-
-{% for s in students %}
-    if("{{s[8]}}".includes("EXCELLENT")) excellent++;
-    if("{{s[8]}}".includes("AVERAGE")) average++;
-    if("{{s[8]}}".includes("WEAK")) weak++;
-{% endfor %}
-
-new Chart(document.getElementById("chart"),{
-type:'bar',
-data:{
-labels:['Excellent','Average','Weak'],
-datasets:[{
-label:'Students',
-data:[excellent,average,weak]
-}]
-},
-options:{
-responsive:true,
-plugins:{legend:{display:false}}
-}
-});
-</script>
-
+    new Chart(document.getElementById("riskTierChart"), {
+        type: 'bar',
+        data: {
+            labels: ['Low Risk (Score >= 75)', 'Moderate (Score 50-74)', 'High Risk (Score < 50)'],
+            datasets: [{
+                label: 'Student Count',
+                data: [lowRisk, modRisk, highRisk],
+                backgroundColor: ['#4f46e5', '#f59e0b', '#ef4444'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+    </script>
 </body>
 </html>

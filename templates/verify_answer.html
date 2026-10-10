@@ -1,6 +1,85 @@
-<h3>{{question}}</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Security Verification - Student Prediction System</title>
 
-<form method="POST" action="/verify_answer">
-    <input name="answer" class="form-control mb-2" placeholder="Enter Answer">
-    <button class="btn btn-success">Verify</button>
-</form>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="/static/css/theme.css">
+
+    <style>
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 460px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 36px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+</head>
+
+<body class="light">
+
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <div class="brand-icon mx-auto mb-2" style="width: 48px; height: 48px; font-size: 1.5rem; background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h4 class="fw-800 tracking-tight mb-1">Security Question</h4>
+            <p class="text-muted small mb-0">Verify your identity to proceed with password reset</p>
+        </div>
+
+        {% if msg %}
+        <div class="alert alert-danger py-2 small d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+            <div>{{ msg }}</div>
+        </div>
+        {% endif %}
+
+        <div class="p-3 rounded-3 bg-light border mb-3">
+            <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Your Registered Question:</div>
+            <div class="fw-bold text-dark mt-1">{{ question }}</div>
+        </div>
+
+        <form method="POST" action="/verify_answer">
+            <div class="mb-3">
+                <label for="answer" class="form-label-custom">
+                    <i class="bi bi-key text-primary"></i> Your Security Answer
+                </label>
+                <input type="text" id="answer" name="answer" class="form-control input-custom" placeholder="Type your answer here" required autofocus>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 fs-6">
+                <i class="bi bi-shield-lock"></i> Verify &amp; Reset Password
+            </button>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top small text-muted">
+            <a href="/" class="fw-semibold text-secondary text-decoration-none">Cancel &amp; Return to Login</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app_interactive.js"></script>
+</body>
+</html>

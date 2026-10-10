@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ML Analysis &amp; Model Comparison - Student Prediction System</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" href="/static/css/theme.css">
+</head>
+
+<body class="light">
+
+    <!-- TOP NAVIGATION -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-lg-4">
+            <a class="navbar-brand d-flex align-items-center gap-3 text-white text-decoration-none" href="/dashboard">
+                <div class="brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <div class="fw-bold fs-6 lh-1">Student Pass & Fail Prediction System</div>
+                    <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.02em;">AI/ML BASED ACADEMIC PERFORMANCE PREDICTION</small>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom" href="/predict">
+                            <i class="bi bi-cpu-fill"></i> Predict Student
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom active" href="/analysis">
+                            <i class="bi bi-bar-chart-steps"></i> ML Analysis
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <button id="themeToggleBtn" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 rounded-pill px-3" title="Toggle Dark/Light Mode">
+                        <i id="themeToggleIcon" class="bi bi-moon-stars-fill"></i>
+                        <span class="small d-none d-md-inline">Theme</span>
+                    </button>
+                    <a href="/dashboard" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                        <i class="bi bi-arrow-left"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+
+        <!-- TITLE BANNER -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 rounded-pill mb-1">
+                    <i class="bi bi-award-fill me-1"></i> Model Benchmarking &amp; Evaluation Suite
+                </span>
+                <h3 class="fw-bold mb-1">Machine Learning Performance Analysis</h3>
+                <p class="text-muted small mb-0">Empirical comparative evaluation across 5 classification algorithms on academic student data.</p>
+            </div>
+
+            <div class="text-end">
+                <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 border border-success border-opacity-25 rounded-pill">
+                    <i class="bi bi-check-circle-fill me-1"></i> Winning Model: <strong>{{ metrics.best_algorithm }}</strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- 4 MODEL METRICS KPI TILES -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-widget acc">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Model Accuracy</div>
+                        <div class="stat-icon"><i class="bi bi-bullseye"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-primary animate-counter" data-target="{{ (metrics.best_metrics.accuracy * 100)|round(2) }}" data-percent="true">0%</div>
+                        <div class="stat-subtext">Overall correct classifications</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-widget pass">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Model Precision</div>
+                        <div class="stat-icon"><i class="bi bi-patch-check-fill"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-success animate-counter" data-target="{{ (metrics.best_metrics.precision * 100)|round(2) }}" data-percent="true">0%</div>
+                        <div class="stat-subtext">True pass purity ratio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-widget total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">Model Recall</div>
+                        <div class="stat-icon"><i class="bi bi-search"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-info animate-counter" data-target="{{ (metrics.best_metrics.recall * 100)|round(2) }}" data-percent="true">0%</div>
+                        <div class="stat-subtext">Sensitivity (Actual pass capture)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-widget rate">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-label">F1-Score</div>
+                        <div class="stat-icon"><i class="bi bi-calculator"></i></div>
+                    </div>
+                    <div>
+                        <div class="stat-number text-warning animate-counter" data-target="{{ metrics.best_metrics.f1_score }}">0</div>
+                        <div class="stat-subtext">Harmonic mean of precision &amp; recall</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALGORITHM COMPARISON TABLE & BAR CHART -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-table text-primary me-2"></i> Algorithm Comparison Matrix
+                        </h5>
+                        <span class="badge bg-secondary-subtle text-secondary small">Stratified 80/20 Test Split</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Each classification model was independently fitted and cross-evaluated using standardized numerical features. The selection engine automatically selected the highest F1-score model.
+                    </p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-center mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-start">Algorithm Name</th>
+                                    <th>Accuracy</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>F1-Score</th>
+                                    <th>Model Selection</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for name, m in metrics.comparison.items() %}
+                            <tr class="{{ 'table-success bg-opacity-25' if name == metrics.best_algorithm else '' }}">
+                                <td class="text-start fw-bold">
+                                    <i class="bi {{ 'bi-star-fill text-warning me-1' if name == metrics.best_algorithm else 'bi-cpu text-muted me-1' }}"></i>
+                                    {{ name }}
+                                </td>
+                                <td>{{ (m.accuracy * 100)|round(2) }}%</td>
+                                <td>{{ (m.precision * 100)|round(2) }}%</td>
+                                <td>{{ (m.recall * 100)|round(2) }}%</td>
+                                <td class="fw-bold">{{ m.f1_score }}</td>
+                                <td>
+                                    {% if name == metrics.best_algorithm %}
+                                        <span class="status-pill status-pass"><i class="bi bi-check-circle-fill"></i> Selected</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-muted">Evaluated</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-bar-chart-fill text-primary me-2"></i> Performance Benchmarks
+                        </h5>
+                        <span class="badge bg-secondary-subtle text-secondary small">Comparative Graph</span>
+                    </div>
+                    <div style="position: relative; height: 280px;">
+                        <canvas id="algoComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFUSION MATRIX & FEATURE IMPORTANCES ROW -->
+        <div class="row g-4">
+            <!-- CONFUSION MATRIX -->
+            <div class="col-lg-6">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> Confusion Matrix
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary small">{{ metrics.best_algorithm }}</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Confusion matrix evaluated on the unseen test partition (N = {{ metrics.dataset_summary.test_samples }} test students).
+                    </p>
+
+                    {% set cm = metrics.best_metrics.confusion_matrix %}
+                    <div class="p-3 bg-light rounded-4">
+                        <table class="table table-borderless text-center align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="fw-bold text-danger pb-2">Predicted FAIL</th>
+                                    <th class="fw-bold text-success pb-2">Predicted PASS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="text-end pe-3 fw-bold text-danger">Actual FAIL</th>
+                                    <td class="p-2">
+                                        <div class="p-3 rounded-3 border border-2 border-primary bg-primary bg-opacity-10 text-primary">
+                                            <div class="small fw-semibold text-uppercase" style="font-size: 0.72rem;">True Negative (TN)</div>
+                                            <div class="fs-3 fw-bold">{{ cm[0][0] }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="p-3 rounded-3 border border-2 border-warning bg-warning bg-opacity-10 text-warning">
+                                            <div class="small fw-semibold text-uppercase" style="font-size: 0.72rem;">False Positive (FP)</div>
+                                            <div class="fs-3 fw-bold">{{ cm[0][1] }}</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-end pe-3 fw-bold text-success">Actual PASS</th>
+                                    <td class="p-2">
+                                        <div class="p-3 rounded-3 border border-2 border-danger bg-danger bg-opacity-10 text-danger">
+                                            <div class="small fw-semibold text-uppercase" style="font-size: 0.72rem;">False Negative (FN)</div>
+                                            <div class="fs-3 fw-bold">{{ cm[1][0] }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="p-3 rounded-3 border border-2 border-success bg-success bg-opacity-10 text-success">
+                                            <div class="small fw-semibold text-uppercase" style="font-size: 0.72rem;">True Positive (TP)</div>
+                                            <div class="fs-3 fw-bold">{{ cm[1][1] }}</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-around text-center text-muted small mt-3 pt-3 border-top">
+                        <div>
+                            Specificity: <strong>{{ ((cm[0][0] / (cm[0][0] + cm[0][1])) * 100)|round(1) }}%</strong>
+                        </div>
+                        <div>
+                            Sensitivity: <strong>{{ (metrics.best_metrics.recall * 100)|round(1) }}%</strong>
+                        </div>
+                        <div>
+                            Misclassification: <strong>{{ ((1.0 - metrics.best_metrics.accuracy) * 100)|round(1) }}%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEATURE IMPORTANCES -->
+            <div class="col-lg-6">
+                <div class="dash-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="bi bi-funnel-fill text-primary me-2"></i> Model Feature Importances
+                        </h5>
+                        <span class="badge bg-secondary-subtle text-secondary small">Gini Impurity Reduction</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Relative predictive contribution of each student academic factor within the trained tree ensemble.
+                    </p>
+
+                    <div style="position: relative; height: 280px;">
+                        <canvas id="featureImportanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <div class="container-fluid px-lg-4 text-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span>🎓 <strong>Student Pass &amp; Fail Prediction System</strong> &bull; AI/ML Project Presentation</span>
+                <span>Powered by Scikit-Learn Classification Pipeline &bull; Academic Decision Support</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app_interactive.js"></script>
+
+    <script>
+    // 📈 1. Algorithm Comparison Chart
+    const algoKeys = {{ metrics.comparison.keys()|list|tojson }};
+    const compData = {{ metrics.comparison|tojson }};
+    const accList = algoKeys.map(k => (compData[k].accuracy * 100).toFixed(1));
+    const f1List = algoKeys.map(k => (compData[k].f1_score * 100).toFixed(1));
+
+    new Chart(document.getElementById("algoComparisonChart"), {
+        type: 'bar',
+        data: {
+            labels: algoKeys,
+            datasets: [
+                {
+                    label: 'Accuracy (%)',
+                    data: accList,
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 6
+                },
+                {
+                    label: 'F1-Score (x100)',
+                    data: f1List,
+                    backgroundColor: '#10b981',
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12 } }
+            },
+            scales: {
+                y: { min: 70, max: 100 }
+            }
+        }
+    });
+
+    // 🔍 2. Feature Importance Chart
+    const featDict = {{ metrics.feature_importances|tojson }};
+    const featLabels = Object.keys(featDict).map(k => k.replace(/_/g, ' ').toUpperCase());
+    const featWeights = Object.values(featDict).map(v => (v * 100).toFixed(1));
+
+    new Chart(document.getElementById("featureImportanceChart"), {
+        type: 'bar',
+        data: {
+            labels: featLabels,
+            datasets: [{
+                label: 'Relative Weight (%)',
+                data: featWeights,
+                backgroundColor: [
+                    '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
